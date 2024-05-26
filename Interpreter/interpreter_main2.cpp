@@ -1449,11 +1449,10 @@ class interpreter{
 			}
 
 			for(std::string& c : condtokens){
-                                std::cout << "*****" << c << "*****";
+                                std::cout << std::endl << c << std::endl;
                                 for(auto& v : vars){
                                         if(v.first == c){
                                                 c = v.second->__str__();
-						std::cout << "cccccccc" << c;
                                                 break;
                                         }
                                 }
@@ -1469,20 +1468,18 @@ class interpreter{
 			if(condtokens.size() >= 3){
 				for(int i = 0; i < condtokens.size(); ++i){
 					if((condtokens[i] == "==" || condtokens[i] == ">" || condtokens[i] == "<" || 
-					condtokens[i] == "<=" || condtokens[i] == ">=" || condtokens[i] == "!=") && condtokens.size() == 3){
+					condtokens[i] == "<=" || condtokens[i] == ">=") && condtokens.size() == 3){
 						arithmetictoken.clear();
-						return condtokens;
+						break;
 					}
 						
 					arithmetictoken += condtokens[i] + " ";
 
-					if((condtokens[i] == "==" || condtokens[i] == ">" || condtokens[i] == "<" || condtokens[i]                                                     == "<=" || condtokens[i] == ">=" || condtokens[i] == "!=") && condtokens.size() >= 4
-					&& i < condtokens.size() - 1){
+					if((condtokens[i] == "==" || condtokens[i] == ">" || condtokens[i] == "<" || condtokens[i]                                                     == "<=" || condtokens[i] == ">=") && condtokens.size() >= 4 && i < condtokens.size() - 1){
 						
 						if(flag){throw std::invalid_argument("Inproper usage of equality operations");}
 
-						while(arithmetictoken[arithmetictoken.size() - 1] == ' ' || arithmetictoken[arithmetictoken.                                                   size() - 1] == '=' || arithmetictoken[arithmetictoken.size() - 1] == '>' ||                                                                    arithmetictoken[arithmetictoken.size() - 1] == '<' 
-						|| arithmetictoken[arithmetictoken.size() - 1] == '!'){
+						while(arithmetictoken[arithmetictoken.size() - 1] == ' ' || arithmetictoken[arithmetictoken.                                                   size() - 1] == '=' || arithmetictoken[arithmetictoken.size() - 1] == '>' ||                                                                    arithmetictoken[arithmetictoken.size() - 1] == '<'){
 							arithmetictoken.erase(arithmetictoken.size() - 1);
 						}
 						flag = true;
@@ -1516,9 +1513,9 @@ class interpreter{
 		bool checkcondition(std::string str){
 			std::string strsub = str.substr(2, str.size() - 4);
 			std::vector<std::string> condtokens = tokenizecondition(strsub);
-			std::vector<object*>condvars;
+
 			for(std::string& c : condtokens){
-				std::cout << "/"<<c << "/";
+				std::cout << c;
 			}
 			
 
@@ -1557,58 +1554,14 @@ class interpreter{
 
 
 				if(condtokens.size() == 3 && (condtokens[1] == "==" || condtokens[1] == ">" || condtokens[1] == "<"
-				  || condtokens[1] == ">=" || condtokens[1] == "<=" || condtokens[1] == "!=")){
-					/*if(condtokens[0][0] == '#'){
-					condvars.push_back
-						(check_and_createobject(std::to_string(exprresult(arithmetics(condtokens[0].substr(1))))));
-					}else{
-						condvars.push_back(check_and_createobject(condtokens[0]));
-					}
-					if(condtokens[2][0] == '#'){
-					condvars.push_back
-						 (check_and_createobject(std::to_string(exprresult(arithmetics(condtokens[2].substr(1))))));
-
-              				}else{
-                                        	condvars.push_back(check_and_createobject(condtokens[2]));
-                                        }*/
-					if(condtokens[0][0] == '#'){
-						condtokens[0] = condtokens[0].substr(1);
-					}
-
-					if(condtokens[2][0] == '#'){
-                                                condtokens[2] = condtokens[2].substr(1);
-                                        }
-					
-					if(condtokens[1] == "=="){
-						return exprresult(arithmetics(condtokens[0])) == exprresult(arithmetics(condtokens[2]));
-					}
-
-					if(condtokens[1] == ">"){
-                                                return exprresult(arithmetics(condtokens[0])) > exprresult(arithmetics(condtokens[2]));
-                                        }
-
-					if(condtokens[1] == "<"){
-                                                return exprresult(arithmetics(condtokens[0])) < exprresult(arithmetics(condtokens[2]));
-                                        }
-
-					if(condtokens[1] == "<="){
-                                                return exprresult(arithmetics(condtokens[0])) <= exprresult(arithmetics(condtokens[2]));
-                                        }
-
-					if(condtokens[1] == ">="){
-                                                return exprresult(arithmetics(condtokens[0])) >= exprresult(arithmetics(condtokens[2]));
-                                        }
-					
-					if(condtokens[1] == "!="){
-                                                return exprresult(arithmetics(condtokens[0])) != exprresult(arithmetics(condtokens[2]));
-                                        }
-
+				  || condtokens[1] == ">=" || condtokens[1] == "<="){
+					check_and_createobject(condtokens[0]);
 
 				}
 			
                 }
 	
-		
+
 
 		int opprecedence(char c){
 			if(c == '*' || c == '/'){
