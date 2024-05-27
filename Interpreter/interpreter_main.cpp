@@ -132,7 +132,7 @@ namespace checktypes{// checking the types of fundamental objects
                 }
 
 
-		double retdouble(std::string str){
+		/*double retdouble(std::string str){
 			std::string resultstr = {""};
 			if(str[0] != '+' && str[0] != '-' && (str[0] < '0' || str[0] > '9')){
                                 throw std::invalid_argument("Not a valid input for dabl");
@@ -168,7 +168,49 @@ namespace checktypes{// checking the types of fundamental objects
 			return true;
                 	
 
-		}
+		}*/
+
+
+
+
+		double retdouble(std::string str){
+                        std::string resultstr = {""};
+                        if(str[0] != '+' && str[0] != '-' && (str[0] < '0' || str[0] > '9')){
+                                throw std::invalid_argument("Not a valid input for dabl");
+                        }
+
+                        if((str[0] == '+' || str[0] == '-') && str[1] == '.'){
+                                throw std::invalid_argument("Not a valid input for dabl");
+                        }
+
+                        int dotcount = 0;
+                        int i = 0;
+                        if(str[i] == '+'){
+                                ++i;
+                        }
+                        for( ; (i != '\0' && i < str.size()); ++i){
+                                if(str[i] == '.'){
+                                        ++dotcount;
+                                        if(dotcount > 1){
+                                                throw std::invalid_argument("Not a valid input for dabl");
+                                        }
+                                        continue;
+
+                                }
+                                if(str[i] < '0' || str[i] > '9'){
+                                        throw std::invalid_argument("Not a valid input for dabl");
+                                }
+                        }
+
+                        if(str[str.size() - 1] == '.'){
+                                throw std::invalid_argument("Not a valid input for dabl");
+                        }
+
+                        return stod(str);
+
+
+                }
+
 
 }
 
@@ -1003,8 +1045,7 @@ class interpreter{
 			getcondfile(str);
 				for(auto& s : condstrings){
 					//std::cout << s << std::endl;
-					auto it = tokens.begin() + n;
-					tokens.emplace(it, tokenize(s));
+					tokens.emplace(tokens.begin() + n, tokenize(s));
 				}
 				condstrings.clear();
 			}
@@ -1044,7 +1085,7 @@ class interpreter{
 
 
 		void getcondfile(std::string str){
-			for(int i = 0; str[i] != '\0'; ++i){
+			for(int i = 0; str[i] != '\0' && i < str.size(); ++i){
 				std::string tmptoken = {""};
 				if(str[i] == ' ' || str[i] == '\t' || str[i] == '\n'){
 					continue;
@@ -1204,6 +1245,7 @@ class interpreter{
 
 
 		void evaluate(){
+			 std::pair<std::string, int>conditernumber;
 			for(int i = 0; i < tokens.size(); ++i){
 				if(tokens[i][1] == "=" && tokens[i].size() == 3){
 
@@ -1278,18 +1320,43 @@ class interpreter{
 						}
 					}
                         
-				if(tokens[i][0] == "iif" ){
-				if(checkcondition(tokens[i][1])){
-					std::cout << "mtav checkcondition";
-					if(i == (tokens.size() - 1)){
-						tokens.resize(tokens.size());
+				if(tokens[i][0] == "iif" && tokens[i].size() == 3){
+					if(checkcondition(tokens[i][1])){
+						std::cout << "mtav checkcondition";
+						std::cout << "tokens beforeresize" << tokens.size();
+						/*if(i == (tokens.size() - 1)){
+							tokens.resize(tokens.size());
+							std::cout << "tokens resize" << tokens.size();
+						}*/
+						addtokens(i + 1, (tokens[i][2]).substr(2, (tokens[i][2]).size() - 4));
+						std::cout << "tokens addedtokenssize" << tokens.size();
+
 					}
-					addtokens(i + 1, (tokens[i][2]).substr(2, (tokens[i][2]).size() - 4));
+                                	continue;
+				}
+			//------------------------------------------------------------------------------------------------------
+			
+				
+				if(tokens[i][0] == "vayl" && tokens[i].size() == 3){
+					if(checkcondition(tokens[i][1]) && conditernumber.first == tokens[i][2]){
+						i = conditernumber.second;
+						continue;
+					}
+					if(checkcondition(tokens[i][1])){
+                                                int tempsize = tokens.size();
+						addtokens(i + 1, (tokens[i][2]).substr(2, (tokens[i][2]).size() - 4));
+						conditernumber = {tokens[i][2], i};
+
+						/*if(i + tokens.size() - tempsize + 1 == tokens.size()){
+							tokens.resize(1);	
+						}*/
+						tokens.emplace(tokens.begin() + i + tokens.size() - tempsize + 1, tokens[i]);
+                                        }
+                                        continue;
 
 				}
-                                continue;
-			}
-			if(tokens[i][0] == "elsif" ){
+				
+				if(tokens[i][0] == "elsif" ){
                                 if(checkcondition(tokens[i][1])){
                                         if(i == (tokens.size() - 1)){
                                                 tokens.resize(tokens.size());
@@ -1449,11 +1516,11 @@ class interpreter{
 			}
 
 			for(std::string& c : condtokens){
-                                std::cout << "*****" << c << "*****";
+                                //std::cout << "*****" << c << "*****";
                                 for(auto& v : vars){
                                         if(v.first == c){
                                                 c = v.second->__str__();
-						std::cout << "cccccccc" << c;
+						//std::cout << "cccccccc" << c;
                                                 break;
                                         }
                                 }
@@ -1496,7 +1563,7 @@ class interpreter{
 				if(flag){
 					arithmeticcondtokens.push_back(arithmetictoken);
 					return arithmeticcondtokens;
-//----------------------------------------------------------------------------------------------------
+
 				}else{
 					arithmeticcondtokens.push_back(arithmetictoken);
                                         return arithmeticcondtokens;
@@ -1518,7 +1585,7 @@ class interpreter{
 			std::vector<std::string> condtokens = tokenizecondition(strsub);
 			std::vector<object*>condvars;
 			for(std::string& c : condtokens){
-				std::cout << "/"<<c << "/";
+				//std::cout << "/"<<c << "/";
 			}
 			
 
@@ -1535,7 +1602,7 @@ class interpreter{
                                         }
                                         return true;
                                 }
-
+//-------------------------------------------------------
 				if(condtokens.size() == 1 && checktypes::isdouble(condtokens[0])){
                                         if(checktypes::retdouble(condtokens[0]) == 0){
                                                 return false;
@@ -1861,12 +1928,17 @@ int main(){
 	std::cout << "----------------------------------"<< std::endl;
 	*/
 	//std::cout << std::endl << ob.exprresult(ob.arithmetics("5 * 6 - ( ( 7 + 3 ) / 2 )"));
+	
+	
+	
+	
 	std::cout << "------------------------" << std::endl;
 	ob.printstrings();
 	std::cout << "------------------------" << std::endl;
 	ob.printtokens();
 	std::cout << "------------------------";	
 	ob.printvars();
+
 
 
 }
